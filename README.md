@@ -1,6 +1,6 @@
 # Wiki Setup Guide:
 
-[https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/Setup-Guide/](https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/)
+[https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/](https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/)
 
 # What Is This?
 
@@ -20,7 +20,7 @@ I've put together a video guide and a GitHub wiki guide to explain how to get yo
 
 Here is the wiki guide:
 
-[https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/Setup-Guide/](https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/)
+[[https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/](https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/)]
 
 And here is the video guide:
 
