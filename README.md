@@ -1,4 +1,4 @@
-What Is This?
+# What Is This?
 
 Turn your server into a Bethesda game with this mod!
 
@@ -24,7 +24,7 @@ https://youtu.be/LudMp14pPqk
 
 This mod has some limitations (eg. does not currently work with ExpansionTraderAI types) and can be a bit tricky to set up for specific NPCs, but it's open-source so feel free to modify the code if you need to, and the guides and example templates are as detailed as possible to help you get started.
 
-Installation Instructions:
+# Installation Instructions:
 
 Install this mod like any other mod - copy it into your server folder and add it to your mods list. Make sure to copy the .bikey into your server keys if you're not using a server management tool like OmegaManager which does that automatically.
 
@@ -32,11 +32,11 @@ This mod must be installed on both server and client.
 
 There are no types or anything like that, but there is a JSON config file that will be generated in "server_profiles/ExpansionMod/Settings/ZenExpansionAudioAI.json" - there are instructions on what this file does in my GitHub wiki guide.
 
-Repack & Source Code:
+# Repack & Source Code:
 
 You can repack this mod if you like, and do anything else you want with it for that matter. The source code is on my GitHub at www.zenarchist.io
 
-Buy Me A Coffee:
+# Buy Me A Coffee:
 
 All my mods are free and open source, but it takes an enormous amount of time to put some of these mods together. If I've helped you out, please consider helping me buy my next coffee! I don't expect it, but I very much appreciate it.
 
