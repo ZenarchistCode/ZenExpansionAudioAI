@@ -1,3 +1,7 @@
+# Wiki Setup Guide:
+
+[https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/Setup-Guide/](https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/)
+
 # What Is This?
 
 Turn your server into a Bethesda game with this mod!
@@ -16,11 +20,11 @@ I've put together a video guide and a GitHub wiki guide to explain how to get yo
 
 Here is the wiki guide:
 
-https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/Setup-Guide/
+[https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/Setup-Guide/](https://github.com/ZenarchistCode/ZenExpansionAudioAI/wiki/)
 
 And here is the video guide:
 
-https://youtu.be/LudMp14pPqk
+[https://youtu.be/LudMp14pPqk](https://youtu.be/LudMp14pPqk)
 
 This mod has some limitations (eg. does not currently work with ExpansionTraderAI types) and can be a bit tricky to set up for specific NPCs, but it's open-source so feel free to modify the code if you need to, and the guides and example templates are as detailed as possible to help you get started.
 
