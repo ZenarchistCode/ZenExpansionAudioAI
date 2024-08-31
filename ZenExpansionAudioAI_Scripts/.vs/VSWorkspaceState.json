@@ -1,0 +1,18 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\scripts",
+    "\\scripts\\3_game",
+    "\\scripts\\3_game\\config",
+    "\\scripts\\5_mission",
+    "\\scripts\\5_mission\\DayZExpansion_P2PMarket",
+    "\\scripts\\5_mission\\DayZExpansion_P2PMarket\\GUI",
+    "\\scripts\\5_mission\\DayZExpansion_P2PMarket\\GUI\\P2PMarket",
+    "\\scripts\\5_mission\\DayZExpansion_Quests",
+    "\\scripts\\5_mission\\DayZExpansion_Quests\\GUI",
+    "\\scripts\\5_mission\\DayZExpansion_Quests\\GUI\\Quests",
+    "\\scripts\\5_mission\\mission"
+  ],
+  "SelectedNode": "\\scripts\\3_game\\config\\ZenExpansionAudioAIConfig.c",
+  "PreviewInSolutionExplorer": false
+}
