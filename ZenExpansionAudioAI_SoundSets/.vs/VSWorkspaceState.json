@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\data",
+    "\\data\\audio",
+    "\\data\\audio\\ai\\generic",
+    "\\data\\audio\\ai\\generic\\threat",
+    "\\data\\audio\\traders",
+    "\\data\\audio\\traders\\hello",
+    "\\data\\audio\\traders\\hello\\generic",
+    "\\data\\audio\\traders\\questrequired",
+    "\\data\\audio\\traders\\questrequired\\generic"
+  ],
+  "SelectedNode": "\\data\\audio\\ai",
+  "PreviewInSolutionExplorer": false
+}
