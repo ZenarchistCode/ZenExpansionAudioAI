@@ -2,7 +2,7 @@ modded class eAIBase
 {
 	static const int ZEN_EXPANSION_AUDIO_HELLO_COOLDOWN = 120000;
 	static const int ZEN_EXPANSION_AUDIO_THREAT_COOLDOWN = 10000;
-	static const int ZEN_EXPANSION_AUDIO_TICK = 1000; // All milisecs
+	static const int ZEN_EXPANSION_AUDIO_TICK = 1000; // All millisecs
 	static const float ZEN_EXPANSION_AUDIO_THREAT_THRESHOLD = 0.2;
 
 	static int m_ZenExpansionAudioMaleSoundSetID_Tracker = 1;
@@ -22,6 +22,8 @@ modded class eAIBase
 	PlayerBase m_ZenExpansionAudioClientPlayer;
 	EffectSound m_VoiceAudioZen;
 
+	ref Timer m_eAI_ZenSoundTimer;
+
 	void eAIBase()
 	{
 		// Server & client vars
@@ -33,12 +35,13 @@ modded class eAIBase
 		if (GetGame().IsDedicatedServer())
 			return;
 
+		m_eAI_ZenSoundTimer = new Timer(CALL_CATEGORY_SYSTEM);
+		m_eAI_ZenSoundTimer.Run(1.0 / 30.0, this, "eAI_Zen_SoundUpdateClient", NULL, true);
+
 		// Client-side only vars
 		m_ZenExpansionAudioHelloLastTime = GetGame().GetTime() - ZEN_EXPANSION_AUDIO_HELLO_COOLDOWN;
 		m_ZenExpansionAudioLastSpoke = GetGame().GetTime() - ZEN_EXPANSION_AUDIO_HELLO_COOLDOWN;
 		m_ZenExpansionAudioClientPlayer = PlayerBase.Cast(GetGame().GetPlayer());
-
-		Zen_SetUniqueAudioSoundsetID();
 
 		GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Zen_Client_RequestGroupName, 1000, false);
 	}
@@ -48,18 +51,41 @@ modded class eAIBase
 	// Maybe there's a better less-convoluted way, I'm too dumb to think of one. Maybe use maps?
 	void Zen_SetUniqueAudioSoundsetID()
 	{
+		bool useGenericVoice = Zen_UseGenericVoice() || Zen_UseGenericThreatVoice();
+		bool useGenericVoiceBadGuy = Zen_UseGenericVoice_BadGuy() || Zen_UseGenericThreatVoice_BadGuy();
+
+		if (!useGenericVoice && !useGenericVoiceBadGuy)
+		{
+			GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] [" + GetType() + "] NPC is NOT using generic voices of any kind @ " + GetPosition());
+			return;
+		}
+
+		int maxMaleSounds = 0;
+		int maxFemaleSounds = 0;
+
+		if (useGenericVoice)
+		{
+			maxMaleSounds = ZenExpansionAudioAIConfig.GenericMaleAISoundSets;
+			maxFemaleSounds = ZenExpansionAudioAIConfig.GenericFemaleAISoundSets;
+		}
+		else 
+		{
+			maxMaleSounds = ZenExpansionAudioAIConfig.GenericMale_BadGuy_AISoundSets;
+			maxFemaleSounds = ZenExpansionAudioAIConfig.GenericFemale_BadGuy_AISoundSets;
+		}
+
 		if (IsMale())
 		{
 			m_ZenExpansionAudioGenericSoundSetID = m_ZenExpansionAudioMaleSoundSetID_Tracker;
 			m_ZenExpansionAudioMaleSoundSetID_Tracker++;
-			if (m_ZenExpansionAudioMaleSoundSetID_Tracker > ZenExpansionAudioAIConfig.GenericMaleAISoundSets)
+			if (m_ZenExpansionAudioMaleSoundSetID_Tracker > maxMaleSounds)
 				m_ZenExpansionAudioMaleSoundSetID_Tracker = 1;
 		}
 		else
 		{
 			m_ZenExpansionAudioGenericSoundSetID = m_ZenExpansionAudioFemaleSoundSetID_Tracker;
 			m_ZenExpansionAudioFemaleSoundSetID_Tracker++;
-			if (m_ZenExpansionAudioFemaleSoundSetID_Tracker > ZenExpansionAudioAIConfig.GenericFemaleAISoundSets)
+			if (m_ZenExpansionAudioFemaleSoundSetID_Tracker > maxFemaleSounds)
 				m_ZenExpansionAudioFemaleSoundSetID_Tracker = 1;
 		}
 	}
@@ -118,12 +144,14 @@ modded class eAIBase
 				return;
 
 			m_ZenExpansionAudioGroupName = client_receive_data.param1;
+			Zen_SetUniqueAudioSoundsetID();
 			GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] [" + GetType() + "] Group: " + m_ZenExpansionAudioGroupName + " SoundSetID=" + m_ZenExpansionAudioGenericSoundSetID);
 		}
 	}
 
 	void Zen_SetGroupName(string name)
 	{
+		Print("[ZenExpansionAudioAI] Setting eAI group name: " + name);
 		m_ZenExpansionAudioGroupName = name;
 	}
 
@@ -150,11 +178,16 @@ modded class eAIBase
 		return ((time - m_ZenExpansionAudioThreatLastTime) < 1000) || (m_ZenExpansionAudioClientPlayer && m_ZenExpansionAudioClientPlayer.eAI_GetLastAggressionCooldown() > 0);
 	}
 
-	// Haven't found an efficient way to check when AI is looking at us client-side yet, so this will do for now - scans nearby area to see if player should be spoken to
-	override void eAI_ClientUpdate()
+	override void eAI_Cleanup(bool autoDeleteGroup = false)
 	{
-		super.eAI_ClientUpdate();
+		super.eAI_Cleanup(autoDeleteGroup);
 
+		if (m_eAI_ZenSoundTimer && m_eAI_ZenSoundTimer.IsRunning())
+			m_eAI_ZenSoundTimer.Stop();
+	}
+
+	void eAI_Zen_SoundUpdateClient()
+	{
 		// Check client player exists
 		if (!m_ZenExpansionAudioClientPlayer || !IsAlive() || IsUnconscious())
 			return;
@@ -206,7 +239,30 @@ modded class eAIBase
 
 		foreach (string s : GetZenExpansionAudioAIConfig().GenericAudioTypes)
 		{
-			if (checkType.Contains(s))
+			//GetZenExpansionAudioAIConfig().DebugMessage("[" + GetType() + " GOODGUY] Checking '" + checkType + "' contains '" + s + "'");
+
+			s.ToLower();
+			if (s == "all" || checkType.Contains(s))
+				return true;
+		}
+
+		return false;
+	}
+
+	private bool Zen_UseGenericVoice_BadGuy()
+	{
+		if (Zen_UseGenericVoice())
+			return false; // Don't allow both
+
+		string checkType = m_ZenExpansionAudioGroupName;
+		checkType.ToLower();
+
+		foreach (string s : GetZenExpansionAudioAIConfig().GenericAudioTypes_BadGuys)
+		{
+			GetZenExpansionAudioAIConfig().DebugMessage("[" + GetType() + " BADGUY GREET] Checking '" + checkType + "' contains '" + s + "'");
+
+			s.ToLower();
+			if (s == "all" || checkType.Contains(s))
 				return true;
 		}
 
@@ -220,7 +276,30 @@ modded class eAIBase
 
 		foreach (string s : GetZenExpansionAudioAIConfig().GenericThreatTypes)
 		{
-			if (checkType.Contains(s))
+			//GetZenExpansionAudioAIConfig().DebugMessage("[" + GetType() + " GOODGUY THREAT] Checking '" + checkType + "' contains '" + s + "'");
+
+			s.ToLower();
+			if (s == "all" || checkType.Contains(s))
+				return true;
+		}
+
+		return false;
+	}
+
+	private bool Zen_UseGenericThreatVoice_BadGuy()
+	{
+		if (Zen_UseGenericThreatVoice())
+			return false; // Don't allow both
+
+		string checkType = m_ZenExpansionAudioGroupName;
+		checkType.ToLower();
+
+		foreach (string s : GetZenExpansionAudioAIConfig().GenericThreatTypes_BadGuys)
+		{
+			GetZenExpansionAudioAIConfig().DebugMessage("[" + GetType() + " BADGUY THREAT] Checking '" + checkType + "' contains '" + s + "'");
+
+			s.ToLower();
+			if (s == "all" || checkType.Contains(s))
 				return true;
 		}
 
@@ -250,14 +329,14 @@ modded class eAIBase
 				}
 				else
 				{
-					voiceSoundSet = "Zen_" + m_ZenExpansionAudioGroupName + "_Threat_Female_SoundSet";
+					voiceSoundSet = "Zen_" + m_ZenExpansionAudioGroupName + "_Hello_Male_SoundSet";
 				}
 			}
 			else
 			{
 				if (threat)
 				{
-					voiceSoundSet = "Zen_" + m_ZenExpansionAudioGroupName + "_Hello_Male_SoundSet";
+					voiceSoundSet = "Zen_" + m_ZenExpansionAudioGroupName + "_Threat_Female_SoundSet";
 				}
 				else
 				{
@@ -274,30 +353,60 @@ modded class eAIBase
 			GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] [" + GetType() + "] Soundset " + voiceSoundSet + " not found.");
 
 			// If NPC type/group is not found on either list, don't play generic voice
-			if (!Zen_UseGenericVoice() && !Zen_UseGenericThreatVoice())
+			if (!Zen_UseGenericVoice() && !Zen_UseGenericThreatVoice() && !Zen_UseGenericVoice_BadGuy() && !Zen_UseGenericThreatVoice_BadGuy())
 				return;
 
 			string genericSoundSet;
 
 			if (threat)
 			{
-				if (IsMale())
-					genericSoundSet = "Zen_ExpansionAIThreatGenericMale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
-				else
-					genericSoundSet = "Zen_ExpansionAIThreatGenericFemale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+				GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] [" + GetType() + "] is threatened!");
+
+				if (Zen_UseGenericThreatVoice())
+				{
+					if (IsMale())
+						genericSoundSet = "Zen_ExpansionAIThreatGenericMale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+					else
+						genericSoundSet = "Zen_ExpansionAIThreatGenericFemale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+
+					GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] [" + GetType() + "] Play generic threat GOOD GUY sound: " + genericSoundSet);
+				}
+				else 
+				if (Zen_UseGenericThreatVoice_BadGuy())
+				{
+					if (IsMale())
+						genericSoundSet = "Zen_ExpansionAIThreatGenericMale_BadGuy_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+					else
+						genericSoundSet = "Zen_ExpansionAIThreatGenericFemale_BadGuy_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+
+					GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] [" + GetType() + "] Play generic threat BAD GUY sound: " + genericSoundSet);
+				}
 
 				voiceSoundSet = genericSoundSet;
 			}
 			else
 			{
+				GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] [" + GetType() + "] is NOT threatened.");
+
 				// This is for bandits etc - don't say Hello to players, we're not friendly
 				if (!Zen_UseGenericVoice())
 					return;
 
-				if (IsMale())
-					genericSoundSet = "Zen_ExpansionAIHelloGenericMale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
-				else
-					genericSoundSet = "Zen_ExpansionAIHelloGenericFemale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+				if (Zen_UseGenericVoice_BadGuy())
+				{
+					if (IsMale())
+						genericSoundSet = "Zen_ExpansionAIHelloGenericMale_BadGuy_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+					else
+						genericSoundSet = "Zen_ExpansionAIHelloGenericFemale_BadGuy_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+				}
+				else 
+				{
+					if (IsMale())
+						genericSoundSet = "Zen_ExpansionAIHelloGenericMale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+					else
+						genericSoundSet = "Zen_ExpansionAIHelloGenericFemale_" + m_ZenExpansionAudioGenericSoundSetID.ToString() + "_SoundSet";
+				}
+				
 
 				voiceSoundSet = genericSoundSet;
 			}

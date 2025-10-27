@@ -11,12 +11,13 @@ modded class MissionGameplay
         if (type != CallType.Client)
             return;
 
-        Param3<bool, ref array<string>, ref array<string>> data;
+        Param5<bool, ref array<string>, ref array<string>, ref array<string>, ref array<string>> data;
         if (!ctx.Read(data))
             return;
 
         // Data received from server - sync to client config
         GetZenExpansionAudioAIConfig().DebugOn = data.param1;
+
         foreach (string s1 : data.param2)
         {
             s1.ToLower();
@@ -29,6 +30,18 @@ modded class MissionGameplay
             GetZenExpansionAudioAIConfig().GenericThreatTypes.Insert(s2);
         }
 
-        GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] GenericMaleAISoundSetCount= " + ZenExpansionAudioAIConfig.GenericMaleAISoundSets + " / GenericFemaleAISoundSetCount=" + ZenExpansionAudioAIConfig.GenericFemaleAISoundSets);
+        foreach (string s3 : data.param4)
+        {
+            s3.ToLower();
+            GetZenExpansionAudioAIConfig().GenericAudioTypes_BadGuys.Insert(s3);
+        }
+
+        foreach (string s4 : data.param5)
+        {
+            s4.ToLower();
+            GetZenExpansionAudioAIConfig().GenericThreatTypes_BadGuys.Insert(s4);
+        }
+
+        GetZenExpansionAudioAIConfig().DebugMessage("[CLIENT] GenericMaleAISoundSetCount= " + ZenExpansionAudioAIConfig.GenericMaleAISoundSets + " / GenericFemaleAISoundSetCount=" + ZenExpansionAudioAIConfig.GenericFemaleAISoundSets + " GenericMaleAISoundSetBadCount= " + ZenExpansionAudioAIConfig.GenericMale_BadGuy_AISoundSets + " / GenericFemaleAISoundSetBadCount=" + ZenExpansionAudioAIConfig.GenericFemale_BadGuy_AISoundSets);
     }
-};
+}

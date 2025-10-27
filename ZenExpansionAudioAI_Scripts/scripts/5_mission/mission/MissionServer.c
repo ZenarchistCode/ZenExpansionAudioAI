@@ -25,7 +25,7 @@ modded class MissionServer
 			return;
 
 		// Send client config
-		ref Param3<bool, ref array<string>, ref array<string>> configParams = new Param3<bool, ref array<string>, ref array<string>>(GetZenExpansionAudioAIConfig().DebugOn, GetZenExpansionAudioAIConfig().GenericAudioTypes, GetZenExpansionAudioAIConfig().GenericThreatTypes);
+		ref Param5<bool, ref array<string>, ref array<string>, ref array<string>, ref array<string>> configParams = new Param5<bool, ref array<string>, ref array<string>, ref array<string>, ref array<string>>(GetZenExpansionAudioAIConfig().DebugOn, GetZenExpansionAudioAIConfig().GenericAudioTypes, GetZenExpansionAudioAIConfig().GenericThreatTypes, GetZenExpansionAudioAIConfig().GenericAudioTypes_BadGuys, GetZenExpansionAudioAIConfig().GenericThreatTypes_BadGuys);
 		GetRPCManager().SendRPC("RPC_ZXAI", "RPC_ReceiveZenExpansionAudioAIConfigOnClient", configParams, true, player.GetIdentity());
 	}
-};
+}

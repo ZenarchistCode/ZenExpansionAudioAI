@@ -41,17 +41,29 @@ class CfgMods
 			class gameScriptModule
 			{
 				value = "";
-				files[] = { "ZenExpansionAudioAI_Scripts/scripts/3_game" };
+				files[] = 
+				{ 
+					"ZenExpansionAudioAI_Scripts/scripts/3_game",
+					"ZenExpansionAudioAI_Scripts/scripts/Common"
+				};
 			};
 			class worldScriptModule
 			{
 				value = "";
-				files[] = { "ZenExpansionAudioAI_Scripts/scripts/4_World" };
+				files[] = 
+				{ 
+					"ZenExpansionAudioAI_Scripts/scripts/4_World",
+					"ZenExpansionAudioAI_Scripts/scripts/Common"
+				};
 			};
 			class missionScriptModule
 			{
 				value = "";
-				files[] = { "ZenExpansionAudioAI_Scripts/scripts/5_mission" };
+				files[] = 
+				{ 
+					"ZenExpansionAudioAI_Scripts/scripts/5_mission",
+					"ZenExpansionAudioAI_Scripts/scripts/Common"
+				};
 			};
 		};
 	};

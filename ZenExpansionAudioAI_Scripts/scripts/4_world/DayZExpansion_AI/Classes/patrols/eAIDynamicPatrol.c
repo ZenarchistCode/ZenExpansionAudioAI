@@ -6,6 +6,7 @@ modded class eAIDynamicPatrol
 	{
 		eAIBase spawnedAI = super.SpawnAI(pos);
 		spawnedAI.Zen_SetGroupName(GetNameForLog());
+		Print("[ZenExpansionAudioAI] Spawned AI with soundset group name: " + GetNameForLog());
 		return spawnedAI;
 	}
 }
